@@ -1,7 +1,5 @@
 FROM ubuntu:18.04 as build
 
-COPY ton-node /tonlabs/ton-node/
-
 # install deps
 ENV TZ=Europe/Moscow
 ENV PATH="/root/.cargo/bin:${PATH}"
@@ -21,6 +19,18 @@ RUN apt-get update && apt-get install -y \
     automake \
     clang \
     git
+
+# Get ton-node repo at point
+ARG TON_NODE_GITHUB_REPO=https://github.com/tonlabs/ton-labs-node
+ENV TON_NODE_GITHUB_REPO=${TON_NODE_GITHUB_REPO}
+
+ARG TON_NODE_GITHUB_COMMIT_ID=master
+ENV TON_NODE_GITHUB_COMMIT_ID=${TON_NODE_GITHUB_COMMIT_ID}
+
+RUN mkdir -p /tonlabs/ton-node \
+    && cd /tonlabs/ton-node \
+    && git clone "${TON_NODE_GITHUB_REPO}" . \
+    && git checkout "${TON_NODE_GITHUB_COMMIT_ID}"
 
 # rdkafka from confluent's repo
 RUN curl https://packages.confluent.io/deb/5.5/archive.key | apt-key add;\
